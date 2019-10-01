@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-var pets []Pet
+var petsArray []Pet
 
 type Pet struct {
 	ID          string `json:"id,omitempty"`
@@ -19,32 +19,37 @@ type Pet struct {
 
 func savePet(w http.ResponseWriter, r *http.Request) {
 	var pet Pet
-	err := json.NewDecoder(r.Body).Decode(&pet)
-
-	if err != nil {
-		http.Error(w, err.Error(), 400)
-		return
-	}
+	_ = json.NewDecoder(r.Body).Decode(&pet)
+	petsArray = append(petsArray, pet)
+	json.NewEncoder(w).Encode(petsArray)
 	fmt.Fprintf(w, "%s is saved with success!", pet.Name)
 
 }
 
 func getAllPets(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(pets)
+	json.NewEncoder(w).Encode(petsArray)
 }
 
 func getPet(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome home!")
+	params := mux.Vars(r)
+	for _, item := range petsArray {
+		if item.ID == params["id"] {
+			json.NewEncoder(w).Encode(item)
+			return
+		}
+	}
+	json.NewEncoder(w).Encode(&Pet{})
+
 }
 
 func deletePet(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	for index, item := range pets {
+	for index, item := range petsArray {
 		if item.ID == params["id"] {
-			pets = append(pets[:index], pets[index+1:]...)
+			petsArray = append(petsArray[:index], petsArray[index+1:]...)
 			break
 		}
-		json.NewEncoder(w).Encode(pets)
+		json.NewEncoder(w).Encode(petsArray)
 	}
 }
 
@@ -61,9 +66,11 @@ func handleRequest() {
 }
 
 func main() {
-	fmt.Println("API Started")
-	handleRequest()
 
-	pets = append(pets, Pet{ID: "1", Name: "John", Age: 12, Description: "Border Collie"})
-	pets = append(pets, Pet{ID: "2", Name: "Toby", Age: 12, Description: "Labrador"})
+	fmt.Println("API Started")
+
+	petsArray = append(petsArray, Pet{ID: "1", Name: "John", Age: 12, Description: "Border Collie"})
+	petsArray = append(petsArray, Pet{ID: "2", Name: "Toby", Age: 12, Description: "Labrador"})
+
+	handleRequest()
 }
