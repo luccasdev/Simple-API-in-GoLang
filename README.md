@@ -4,6 +4,6 @@ Routes:
 <br>
 <b>"/pet/{id}"</b>, Methods("GET") <br>
 <b>"/pet"</b>, Methods("GET") <br>
-<b>"/pet"</b>, savePet Methods("POST") <br>
+<b>"/pet"</b>,  Methods("POST") <br>
 <b>"/pet/{id}"</b>, Methods("DELETE") <br>
 
